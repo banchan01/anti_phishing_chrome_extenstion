@@ -1,0 +1,20 @@
+{
+    "name": "anti-phishing-backend",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Backend for Anti-Phishing Chrome Extension",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js"
+    },
+    "dependencies": {
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "mongodb": "^6.3.0",
+        "onnxruntime-node": "^1.20.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2"
+    }
+}

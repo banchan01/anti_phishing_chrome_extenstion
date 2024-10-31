@@ -1,10 +1,39 @@
 {
   "manifest_version": 3,
-  "name": "Anti-Phishing Chrome Extension",
-  "description": "An extension to detect and prevent phishing attacks.",
+  "name": "Machine Learning Anti-Phishing Chrome Extension",
+  "description": "An extension to detect and prevent phishing attacks using machine learning.",
   "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["main.js"]
+    }
+  ],
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  },
   "action": {
-    "default_popup": "hello.html",
-    "default_icon": "hello_extensions.png"
+    "default_popup": "main.html",
+    "default_icon": {
+      "16": "logo.png",
+      "32": "logo.png",
+      "48": "logo.png",
+      "128": "logo.png"
+    }
   }
 }
