@@ -84,5 +84,5 @@ feature_importance = pd.DataFrame({
 print("\nFeature Importance:")
 print(feature_importance.sort_values('importance', ascending=False))
 
-# 10. Save the model (optional)
+# 10. Save the model
 # joblib.dump(rf_model, '../ml/model/random_forest_model.joblib')
