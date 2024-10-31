@@ -1,9 +1,15 @@
+# Imports for the model
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import joblib
+
+# Imports for the ONNX conversion
+from skl2onnx import convert_sklearn
+from skl2onnx.common.data_types import FloatTensorType
+import json
 
 # 1. Load the data
 data = pd.read_csv('../ml/dataset/dataset_training.csv')
@@ -15,19 +21,14 @@ selected_features = [
     'ip',                  # Contains IP address (0/1)
     'nb_dots',            # Number of dots
     'nb_hyphens',         # Number of hyphens
-    'nb_at',              # Number of @ symbols
     'nb_qm',              # Number of question marks
     'nb_and',             # Number of & symbols
     'nb_eq',              # Number of = symbols
     'nb_underscore',      # Number of underscores
-    'nb_tilde',           # Number of tildes
     'nb_percent',         # Number of % symbols
     'nb_slash',           # Number of slashes
-    'nb_colon',           # Number of colons
     'nb_semicolumn',      # Number of semicolons
-    'nb_space',           # Number of spaces
     'nb_www',             # Contains 'www' (0/1)
-    'nb_com',             # Contains '.com' (0/1)
     'page_rank',          # PageRank score
     'google_index',       # Google index (0/1)
     'status'              # Target variable
@@ -81,5 +82,24 @@ feature_importance = pd.DataFrame({
 print("\nFeature Importance:")
 print(feature_importance.sort_values('importance', ascending=False))
 
-# 10. Save the model (optional)
-# joblib.dump(rf_model, '../ml/model/random_forest_model.joblib')
+# 10. Save the model
+joblib.dump(rf_model, '../ml/model/random_forest_model.joblib')
+
+# Convert to ONNX
+feature_names = list(x.columns)
+initial_type = [('float_input', FloatTensorType([None, len(feature_names)]))]
+onnx_model = convert_sklearn(rf_model, initial_types=initial_type)
+
+# Save ONNX model
+with open("../ml/model/rf_model.onnx", "wb") as f:
+    f.write(onnx_model.SerializeToString())
+
+# Save feature metadata
+model_metadata = {
+    'feature_names': feature_names,
+    'feature_importance': rf_model.feature_importances_.tolist(),
+    'model_accuracy': accuracy
+}
+
+with open('../ml/model/model_metadata.json', 'w') as f:
+    json.dump(model_metadata, f)
