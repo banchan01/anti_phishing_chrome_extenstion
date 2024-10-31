@@ -1,43 +1,22 @@
 import joblib
 import pandas as pd
 
-# 1. Load the saved model
-try:
-    model = joblib.load('../ml/model/random_forest_model.joblib')
-    print("Model loaded successfully!")
+# Load the saved model
+model = joblib.load("../ml/model/random_forest_model.joblib")
 
-    # 2. Load some test data (using the same dataset)
-    data = pd.read_csv('../ml/dataset/dataset_training.csv')
+# Get feature names
+feature_names = model.feature_names_in_
 
-    # 3. Select same features as training
-    selected_features = [
-        'length_url',
-        'length_hostname',
-        'ip',
-        'nb_dots',
-        'nb_hyphens',
-        'nb_qm',
-        'nb_and',
-        'nb_eq',
-        'nb_underscore',
-        'nb_percent',
-        'nb_slash',
-        'nb_semicolumn',
-        'nb_www',
-        'page_rank',
-        'google_index'
-    ]
+# Print feature names in order
+print("Feature names in order:")
+for i, name in enumerate(feature_names):
+    print(f"{i}: {name}")
 
-    # 4. Prepare test data
-    X_test = data[selected_features].head(10)  # Adjust head to test the number of rows
-    print(X_test)
-    
-    # 5. Make predictions
-    predictions = model.predict(X_test)
-    print("\nTest Predictions for first 5 entries:")
-    print(predictions)
-    
-    print("\nModel works correctly!")
+# Optional: Create a DataFrame of feature importances
+feature_importance = pd.DataFrame({
+    'feature': feature_names,
+    'importance': model.feature_importances_
+}).sort_values('importance', ascending=False)
 
-except Exception as e:
-    print(f"Error: {e}")
+print("\nFeature Importance:")
+print(feature_importance)
