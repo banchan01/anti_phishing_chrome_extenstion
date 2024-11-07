@@ -17,8 +17,8 @@ app = Flask(__name__)
 CORS(app)
 
 # MongoDB configuration
-app.config["MONGO_URI"] = os.getenv("MONGODB_URI", "mongodb://localhost:27017/phishing")
-mongo = PyMongo(app)
+# app.config["MONGO_URI"] = os.getenv("MONGODB_URI", "mongodb://localhost:27017/phishing")
+# mongo = PyMongo(app)
 
 # Load the model
 model = joblib.load("../ml/model/random_forest_model.joblib")
