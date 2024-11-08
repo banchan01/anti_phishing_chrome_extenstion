@@ -5,9 +5,13 @@ import joblib
 import numpy as np
 from dotenv import load_dotenv
 import os
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+from urllib.parse import urlparse
 from controllers.page_rank_controller import get_page_rank
 from controllers.google_index_controller import get_google_index
 from controllers.database_controller import connect_to_database, add_phishing_link
+from config import ALLOWED_DOMAINS  # Import ALLOWED_DOMAINS from config.py
 
 # Load environment variables
 load_dotenv()
@@ -16,35 +20,30 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# MongoDB configuration
+# MongoDB configuration (also consider moving to config.py if needed)
 # app.config["MONGO_URI"] = os.getenv("MONGODB_URI", "mongodb://localhost:27017/phishing")
 # mongo = PyMongo(app)
 
-# Load the model
-model = joblib.load("../ml/model/random_forest_model.joblib")
+# Load the DNN model and scaler
+model = load_model("models/dnn_model.h5")
+scaler = joblib.load("scaler.joblib")
 
 # Feature names in exact order from training
 FEATURE_NAMES = [
-    'length_url',          # Length of the URL
-    'length_hostname',     # Length of the hostname
-    'ip',                  # Contains IP address (0/1)
-    'nb_dots',            # Number of dots
-    'nb_hyphens',         # Number of hyphens
-    'nb_qm',              # Number of question marks
-    'nb_and',             # Number of & symbols
-    'nb_eq',              # Number of = symbols
-    'nb_underscore',      # Number of underscores
-    'nb_percent',         # Number of % symbols
-    'nb_slash',           # Number of slashes
-    'nb_semicolumn',      # Number of semicolons
-    'nb_www',             # Contains 'www' (0/1)
-    'page_rank',          # PageRank score
-    'google_index'        # Google index (0/1)
+    'length_url', 'length_hostname', 'ip', 'nb_dots', 'nb_hyphens', 'nb_qm', 'nb_and',
+    'nb_eq', 'nb_underscore', 'nb_percent', 'nb_slash', 'nb_semicolumn', 'nb_www',
+    'page_rank', 'google_index'
 ]
 
 @app.before_request
 def log_request():
     print(f"Received {request.method} request for {request.path}")
+
+def is_trusted_domain(url):
+    """Check if the URL belongs to a trusted domain in the allowlist."""
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc.replace("www.", "")  # Remove 'www.' prefix if present
+    return any(allowed_domain in domain for allowed_domain in ALLOWED_DOMAINS)
 
 @app.route('/api/check-url', methods=['POST'])
 def check_url():
@@ -54,6 +53,18 @@ def check_url():
         
         if not url:
             return jsonify({'error': 'URL is required'}), 400
+
+        # Check if the URL is in the allowlist of trusted domains
+        if is_trusted_domain(url):
+            response_data = {
+                'url': url,
+                'is_phishing': 0,
+                'prediction_score': 0.0,
+                'status': 'success',
+                'message': 'Site Appears Safe (Trusted Domain)',
+                'analysis': {}
+            }
+            return jsonify(response_data)
 
         # Extract features
         features = {
@@ -85,20 +96,21 @@ def check_url():
         for name in FEATURE_NAMES:
             features[name] = features.get(name, -1)
 
-        # Make prediction with ordered features
+        # Make prediction with ordered and scaled features
         feature_array = np.array([[features[name] for name in FEATURE_NAMES]], dtype=np.float32)
-        prediction = model.predict_proba(feature_array)[0]
-        is_phishing = int(prediction[1] > 0.5)
+        feature_array = scaler.transform(feature_array)  # Scale the features
+        prediction = model.predict(feature_array)[0][0]  # Get the prediction probability
+        is_phishing = int(prediction > 0.5)  # Threshold at 0.5
         
         # Save to database if phishing
         if is_phishing:
-            add_phishing_link(url, features, float(prediction[1]))
+            add_phishing_link(url, features, float(prediction))
         
         response_data = {
             'url': url,
             'features': features,
             'is_phishing': is_phishing,
-            'prediction_score': float(prediction[1]),
+            'prediction_score': float(prediction),
             'status': 'error' if is_phishing else 'success',
             'message': 'Warning: Phishing Site Detected' if is_phishing else 'Site Appears Safe',
             'analysis': {
