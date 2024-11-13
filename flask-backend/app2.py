@@ -1,7 +1,6 @@
 # -*- coding: cp949 -*-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_pymongo import PyMongo
 import joblib
 import numpy as np
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -21,12 +20,8 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# MongoDB configuration
-app.config["MONGO_URI"] = os.getenv("MONGODB_URI", "mongodb://localhost:27017/phishing")
-mongo = PyMongo(app)
-
 # Load the model
-model = load_model("../ml/model/CNN_model.h5")  # Use load_model for Keras models
+model = load_model("../flash-backend/models/CNN_model.h5")  # Use load_model for Keras models
 
 # Hyperparameter settings
 max_length = 100  # Maximum URL length
