@@ -2,3 +2,4 @@ myenv/
 .env
 node_modules/
 venv
+.env_1
