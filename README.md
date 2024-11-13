@@ -38,7 +38,7 @@ The project consists of three main components:
 1. Install Python dependencies:
 - Run `cd flask-backend` to navigate to the backend directory.
 - Set-up python virtual environment `python3 -m venv venv`
-- Activate the virtual environment with `source myenv/bin/activate` (Mac) or `myenv\Scripts\activate` (Windows)
+- Activate the virtual environment with `source venv/bin/activate` (Mac) or `myenv\Scripts\activate` (Windows)
 - Install dependencies with `pip install pandas numpy scikit-learn joblib matplotlib seaborn`
 
 2. Set up environment variables:
