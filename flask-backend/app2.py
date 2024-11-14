@@ -21,7 +21,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load the model
-model = load_model("../flash-backend/models/CNN_model.h5")  # Use load_model for Keras models
+model = load_model("../ml/model/CNN_model.h5")  # Use load_model for Keras models
 
 # Hyperparameter settings
 max_length = 100  # Maximum URL length
