@@ -21,11 +21,11 @@ app.config["MONGO_URI"] = os.getenv("MONGODB_URI", "mongodb://localhost:27017/ph
 mongo = PyMongo(app)
 
 # Load the model
-model = joblib.load("../ml/model/random_forest_model.joblib")
+model = joblib.load("models/random_forest_model.joblib")
 
 # Feature names in exact order from training
 FEATURE_NAMES = [
-    'length_url',          # Length of the URL
+    'length_url',          # Length of the URLd
     'length_hostname',     # Length of the hostname
     'ip',                  # Contains IP address (0/1)
     'nb_dots',            # Number of dots
