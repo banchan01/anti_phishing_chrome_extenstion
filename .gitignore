@@ -1,5 +1,9 @@
 myenv/
+venv/
 .env
 node_modules/
-venv
+flask-backend/venv/
+**/venv/
+env/
+.venv/
 .env_1
